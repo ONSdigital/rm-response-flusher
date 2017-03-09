@@ -6,7 +6,7 @@ require 'ons-jwe'
 require 'openssl'
 
 unless ARGV.length == 2
-  puts 'Usage: eq_flush_script.rb <input.csv> <server>'
+  puts 'Usage: eq_flush_script.rb <input_file> <server>'
   exit
 end
 
