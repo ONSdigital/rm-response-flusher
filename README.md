@@ -1,4 +1,4 @@
-# rm-response-flusher
+# Response Flusher Script
 Script to flush partially completed questionnaire responses through eQ.
 
-Usage: run with './eq_flush_script.rb <file_name> <eq_server>'
+Usage: run with `./eq_flush_script.rb <file_name> https://<eq_server>`
