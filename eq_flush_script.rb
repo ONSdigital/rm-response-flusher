@@ -11,7 +11,7 @@ unless ARGV.length == 2
 end
 
 KEY_ID = 'EDCRRM'.freeze
-config_file = YAML.load_file(File.join(__dir__, '/config.yml'))
+config_file = YAML.load_file(File.join(__dir__, 'config.yml'))
 public_key_file = config_file['eq-service']['public_key']
 private_key_file = config_file['eq-service']['private_key']
 private_key_pass_file = config_file['eq-service']['private_key_passphrase']
