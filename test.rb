@@ -1,4 +1,3 @@
-#test.rb
 require 'json'
 require 'ons-jwe'
 require 'openssl'

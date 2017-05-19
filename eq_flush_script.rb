@@ -32,6 +32,9 @@ private_key = load_key_from_file(private_key_file,
 
 while (line = file_obj.gets)
 
+  # TODO: Add form_type claim set from second column in CSV input file
+  # i.e. household. individual or communal
+  # TODO: Change ru_ref claim to use first column in CSV input file
   claims = {
     collection_exercise_sid: '0',
     eq_id: 'census',
@@ -42,17 +45,22 @@ while (line = file_obj.gets)
     tx_id: SecureRandom.uuid
   }
 
+  puts "claims=#{claims}"
   token = JWEToken.new(KEY_ID, claims, public_key, private_key)
 
   RestClient.post("#{eq_server}:#{port}/flush?token=#{token.value}", {
-                  }) do |post_response, _request, _result, &_block|
-    code = post_response.code
-    case code
-    when 200 then $stdout.puts '200 Flush successful.'
-    when 401 then $stderr.puts '401 Error: Authentication Failure'
-    when 403 then $stderr.puts '403 Error: Permission Denied'
-    when 404 then $stderr.puts '404 Error: Survey Response not found for case ' + line
-    when 500 then $stderr.puts '500 Error: Flushing failed'
+                  }) do |response, _request, _result, &_block|
+    case response.code
+    when 200
+      puts '200 Flush successful'
+    when 401
+      puts '401 Error: Authentication failure'
+    when 403
+      puts '403 Error: Permission denied'
+    when 404
+      puts '404 Error: Survey response not found for case ' + line
+    when 500
+      puts '500 Error: Flushing failed'
     end
   end
   sleep(3)
