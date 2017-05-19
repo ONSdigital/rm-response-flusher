@@ -38,7 +38,7 @@ while (line = file_obj.gets)
     exp: Time.now.to_i + 60 * 60,
     iat: Time.now.to_i,
     roles: ['flusher'],
-    ru_ref: line,
+    ru_ref: line.strip,
     tx_id: SecureRandom.uuid
   }
 
