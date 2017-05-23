@@ -4,6 +4,7 @@ require 'yaml'
 require 'json'
 require 'ons-jwe'
 require 'openssl'
+require 'csv'
 
 unless ARGV.length == 2
   puts 'Usage: eq_flush_script.rb <input_file> <server>'
@@ -22,33 +23,32 @@ def load_key_from_file(file, passphrase = nil)
 end
 
 eq_server = ARGV[1]
-input_file = ARGV[0]
+input_file = File.read(ARGV[0])
 
-file_obj = File.new(input_file, 'r')
+input_file_csv = CSV.parse(input_file, headers: true)
 
 public_key  = load_key_from_file(public_key_file)
 private_key = load_key_from_file(private_key_file,
                                  private_key_pass_file)
 
-while (line = file_obj.gets)
-
-  # TODO: Add form_type claim set from second column in CSV input file
-  # i.e. household. individual or communal
-  # TODO: Change ru_ref claim to use first column in CSV input file
+input_file_csv.each do |input_file_row|
   claims = {
     collection_exercise_sid: '0',
     eq_id: 'census',
     exp: Time.now.to_i + 60 * 60,
     iat: Time.now.to_i,
     roles: ['flusher'],
-    ru_ref: line.strip,
+    ru_ref: input_file_row[0].delete(' '),
+    form_type: input_file_row[1].delete(' '),
     tx_id: SecureRandom.uuid
   }
 
   puts "claims=#{claims}"
   token = JWEToken.new(KEY_ID, claims, public_key, private_key)
 
-  RestClient.post("#{eq_server}:#{port}/flush?token=#{token.value}", {
+  puts "#{eq_server}/flush?token=#{token.value}"
+
+  RestClient.post("#{eq_server}/flush?token=#{token.value}", {
                   }) do |response, _request, _result, &_block|
     case response.code
     when 200
@@ -58,12 +58,10 @@ while (line = file_obj.gets)
     when 403
       puts '403 Error: Permission denied'
     when 404
-      puts '404 Error: Survey response not found for case ' + line
+      puts '404 Error: Survey response not found for case ' + input_file_row[0].delete(' ')
     when 500
       puts '500 Error: Flushing failed'
     end
   end
   sleep(3)
 end
-
-file_obj.close
